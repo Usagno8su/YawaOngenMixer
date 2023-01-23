@@ -63,7 +63,9 @@ VOICEPEAKについては公式ドキュメントを確認した上で、
 
 ## インストール方法
 
-編集中
+下記ドキュメントに記載しました。
+
+- [docs/インストール方法.md](https://github.com/Usagno8su/YawaOngenMixer_doc/blob/main/docs/%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB%E6%96%B9%E6%B3%95.md)
 
 
 ## 利用方法法
