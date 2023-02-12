@@ -95,15 +95,9 @@ VOICEPEAKについては公式ドキュメントを確認した上で、
 
 1. 立ち絵の準備
 
-まず、立ち絵のpngファイルを準備します。
+まず、立ち絵のpngファイルを準備し、わかりやすい場所に配置します。
 
-そして、どこに配置したいかをconfファイルに設定します。
-
-または、任意のペイントソフトを使用し、
-作りたい動画の縦横のピクセルと同じ大きさの透明なpng画像に、
-表示したい立ち絵を合成します。
-
-動画の大きさはこのとき作成する画像サイズで決まります。
+今回は public の中に入れました。
 
 
 2. ファイルの配置
@@ -112,18 +106,18 @@ VOICEVOX 等が出力した音声ファイルとテキストファイルを infi
 
 3. 「 config/main_config.yml 」の編集
 
-main_config.yml の下記の行を変更し、「 1. 」で作成したファイルを指定します。
+main_config.yml の下記の行を変更し、「 1. 」のファイルを指定します。
 
 ```
   # 立ち絵
-  tatie: "./public/base_1280x640.png"
+  tatie: "./public/tatie.png"
 ```
 
 各キャラごとに立ち絵やフォント等を変更可能です。
 
 詳細は下記に記載しております。
 
-- [docs/configファイルの記述方法.md](https://github.com/Usagno8su/YawaOngenMixer_doc/blob/main/docs/config%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%81%AE%E8%A8%98%E8%BF%B0%E6%96%B9%E6%B3%95.md)
+- [/YawaOngenMixer_doc/docs/configファイルの記述方法.md](https://github.com/Usagno8su/YawaOngenMixer_doc/blob/main/docs/config%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%81%AE%E8%A8%98%E8%BF%B0%E6%96%B9%E6%B3%95.md)
 
 
 
