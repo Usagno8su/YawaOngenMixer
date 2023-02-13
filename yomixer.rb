@@ -411,12 +411,24 @@ class YawaOngenMixer
     
     # 立ち絵の位置を決める。
     case @dgmakhash["tatie_muki"]
-    when "L" then
-      tatie_muki = "SouthWest"  # 左
-    when "R" then
-      tatie_muki = "SouthEast"  # 右
+    when "上段左", "NorthWest" then
+      tatie_muki = "NorthWest"
+    when "上段右", "NorthEast" then
+      tatie_muki = "NorthEast"
+    when "上段中央", "North" then
+      tatie_muki = "North"
+    when "中段左", "West" then
+      tatie_muki = "West"
+    when "中段右", "East" then
+      tatie_muki = "East"
+    when "中段中央", "Center" then
+      tatie_muki = "Center"
+    when "L", "下段左", "SouthWest" then
+      tatie_muki = "SouthWest"
+    when "R", "下段右", "SouthEast" then
+      tatie_muki = "SouthEast"
     else
-      tatie_muki = "South"      # 中央
+      tatie_muki = "South"      # 下段中央
     end
       
     
