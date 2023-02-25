@@ -58,6 +58,8 @@ defo:
     enatext: "yes"
     # 字幕をどちらによせるか（L=左揃え,R=右揃え,それ以外=中央揃え）
     ena_muki: "tyuuou"
+    # 字幕が画面横にはみ出してしまう場合、自動で改行を行うか指定（yesなら自動改行を行う）
+    ena_auto_kaigyou: "yes"
     # 字幕のフチに色をつけるか指定定（yesを入れると表示）
     enatextbord: "yes"
     # 字幕の背景色をつけるか指定定（yesを入れると表示）

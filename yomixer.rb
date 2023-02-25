@@ -26,11 +26,18 @@ $errorput = ""
 $voice_file_type_list = ["wav", "ogg", "mp3", "opus"]
 
 # どの項目の設定を用いて動画を作るか、判定を行なわなければならない要素を配列に記載
-$hantei_list = ["enatext", "ena_muki", "enatextbord", "enabg", \
+$hantei_list = ["enatext", "ena_muki", "ena_auto_kaigyou", "enatextbord", "enabg", \
                 "tatie", "tatie_muki", "conp_tatie", "movi_w", "movi_h", "tatie_h_p", "fps", \
                 "voice_text_fonts", "voice_text_size", "voice_text_color", \
                 "voice_text_bordercr", "voice_text_borderw", "voice_text_bgcolor", "voice_text_bgtoumei"]
     
+
+# 字幕の文字列を分割する際に、どの文字で分割するか指定する。
+# ここで指定した文字で字幕を分けて複数行にする。
+# 優先度順に記載する。
+$pisplit_list = ["。", "、", "！", "？"]
+
+
 
 
 ################################################################################
@@ -274,109 +281,9 @@ class YawaOngenMixer
   # 上記以外はconfフィアルを参照して下さい。
   def dougaMake()
     
-    ### 字幕を入れるか判断する。
-    # @dgmakhash["enatext"] が yes で、なおかつ字幕のテキストファイルとフォントファイルがあるか確認する。
-    if ( ( @dgmakhash["enatext"] == "yes" ) and ( File.file?(@dgmakhash["voice_text_file"]) ) and ( File.file?(@dgmakhash["voice_text_fonts"]) ) ) then
-      
-      
-      # 字幕が左右どちらにあるか
-      muki = @dgmakhash["ena_muki"]
-      
-      # 字幕の背景色を入れるか判断する。
-      if (@dgmakhash["enabg"] == "yes") then
-        
-        # 字幕の左右によって背景色の描写開始位置を変える
-        if (muki == "L") then
-          
-          # 左の場合はそこを開ける
-          haikeimuki = "(iw*0.25)"
-          
-        else
-          
-          # 右の場合はそこを開ける
-          haikeimuki = "(iw*0.05)"
-          
-        end
-        
-        haikeisyoku = "drawbox=x=#{haikeimuki}:y=ih*0.8:w=iw*0.7:h=ih*0.2:t=fill:\
-                       color=#{@dgmakhash["voice_text_bgcolor"]}@#{@dgmakhash["voice_text_bgtoumei"]}:replace=1,"
-        
-        # 文字のy座標の計算式を入れる
-        # 背景色の右上から下へ文字を描写する。
-        mozizahyou = "(h*0.8)+20"
-      else
-        
-        # 背景を入れない場合は空白にする
-        haikeisyoku = ""
-        
-        ## 文字のy座標の計算式を入れる
-        
-        # テキストファイルの行数をカウントする。
-        gyoucunt = File.read(@dgmakhash["voice_text_file"]).lines.count
-        
-        # 動画の下辺りに文字が来るように開始位置を決める。
-        # 二行以上の場合は、その分描写開始位置を上にずらす必要がある。
-        # また、文字の高さ分だけ開始位置を上にすると、動画の下ギリギリに字幕が描写されるので +10 している。
-        mozizahyou = "h-((#{@dgmakhash["voice_text_size"]}*#{gyoucunt})+10)"
-      end
     
-      
-      # 字幕のフチに色をつけるか判断する
-      if (@dgmakhash["enatextbord"] == "yes") then
-        huti = "bordercolor=#{@dgmakhash["voice_text_bordercr"]}:borderw=#{@dgmakhash["voice_text_borderw"]}:"
-      else
-        # 字幕のフチに色をつけない場合は空の値を入れる。
-      huti = ""
-        
-      end
-      
-      # 字幕をどちらに寄せるかによって字幕の描写開始位置を変える
-      if (muki == "L") then
-        
-        # 左の場合はそこを開ける
-        zimakumuki = "(w*0.3)-(w*0.04)"
-        
-      elsif (muki == "R") then
-        
-        # 右の場合はそこを開ける
-        zimakumuki = "(w*0.06)"
-        
-      else
-        
-        # 向きが指定されていない場合は中央揃えで表示する。
-        zimakumuki = "((w-tw)/2)"
-        
-      end
-      
-      
-      # コマンドを作る。
-      zimakuline = "-filter_complex \"format=rgba,#{haikeisyoku}drawtext=fontfile=\'#{@dgmakhash["voice_text_fonts"]}\':\
-                    textfile=\'#{@dgmakhash["voice_text_file"]}\':fontcolor=#{@dgmakhash["voice_text_color"]}:\
-                    #{huti}fontsize=#{@dgmakhash["voice_text_size"]}:x=#{zimakumuki}:y=#{mozizahyou}\""
-      
-      
-    else
-      
-      # @dgmakhash["enatext"] が yes なのに字幕のテキストファイルがない場合はエラー情報を出力しておく。
-      if ( ( @dgmakhash["enatext"] == "yes" ) and ( File.file?(@dgmakhash["voice_text_file"]) == false ) ) then
-        
-        # 最後に出力するため、変数に書き出す。
-        $errorput << "指定された字幕のテキストファイル「 #{@dgmakhash["voice_text_file"]} 」が存在しなかったため、字幕なしで作成しました。\n"
-      end
-      
-      # @dgmakhash["enatext"] が yes なのにフォントファイルがない場合はエラー情報を出力しておく。
-      if ( ( @dgmakhash["enatext"] == "yes" ) and ( File.file?(@dgmakhash["voice_text_fonts"]) == false ) ) then
-        
-        # 最後に出力するため、変数に書き出す。
-        $errorput << "指定された字幕のフォントファイル「 #{@dgmakhash["voice_text_fonts"]} 」が存在しなかったため、字幕なしで作成しました。\n"
-      end
-      
-      
-    
-      # 字幕を入れない場合は空の値を入れる。
-      zimakuline = ""
-      
-    end
+    # 字幕部分のコマンドを作る。
+    zimakuline = mkZimakuCom()
     
     # エンコードを実施する
     # 音声と立ち絵を合成する。
@@ -385,6 +292,10 @@ class YawaOngenMixer
     system("ffmpeg -y -loop 1 -r #{@dgmakhash["fps"]} -i #{@dgmakhash["tatie"]} -i \"#{@dgmakhash["voice_file"]}\" \
             -auto-alt-ref 0 -c:a libvorbis -c:v libvpx-vp9 -shortest -fflags shortest -max_interleave_delta 20M \
             #{zimakuline} -r #{@dgmakhash["fps"]} \"#{@dgmakhash["out_mvfile"]}\"")
+    
+    
+    # ffmpegコマンドによる動画作成後の一時ファイルの削除等の作業を行う。
+    afterDougamake()
     
     return(0)
   end
@@ -539,6 +450,342 @@ class YawaOngenMixer
     
     return(0)
   end
+  
+  
+  
+  
+  # ffmpegに字幕を表示させるためのコマンドを作成する。
+  # 作成したコマンドを返す。
+  def mkZimakuCom()
+    
+    ### 字幕を入れるか判断する。
+    # @dgmakhash["enatext"] が yes で、なおかつ字幕のテキストファイルとフォントファイルがあるか確認する。
+    # 全てがture にならない場合は、字幕を入れない。
+    if ( ( ( @dgmakhash["enatext"] == "yes" ) and ( File.file?(@dgmakhash["voice_text_file"]) ) and ( File.file?(@dgmakhash["voice_text_fonts"]) ) ) != true ) then
+      
+      
+      # @dgmakhash["enatext"] が yes なのに字幕のテキストファイルがない場合はエラー情報を出力しておく。
+      if ( ( @dgmakhash["enatext"] == "yes" ) and ( File.file?(@dgmakhash["voice_text_file"]) == false ) ) then
+        
+        # 最後に出力するため、変数に書き出す。
+        $errorput << "指定された字幕のテキストファイル「 #{@dgmakhash["voice_text_file"]} 」が存在しなかったため、字幕なしで作成しました。\n"
+      end
+      
+      # @dgmakhash["enatext"] が yes なのにフォントファイルがない場合はエラー情報を出力しておく。
+      if ( ( @dgmakhash["enatext"] == "yes" ) and ( File.file?(@dgmakhash["voice_text_fonts"]) == false ) ) then
+        
+        # 最後に出力するため、変数に書き出す。
+        $errorput << "指定された字幕のフォントファイル「 #{@dgmakhash["voice_text_fonts"]} 」が存在しなかったため、字幕なしで作成しました。\n"
+      end
+      
+      
+    
+      # 字幕を入れない場合は空の値を返す。
+      return("")
+      
+    end
+    
+    
+    
+    
+    
+    # 字幕の背景色を入れるか判断する。
+    if (@dgmakhash["enabg"] == "yes") then
+      
+      # 字幕の左右によって背景色の描写開始位置を変える
+      if (@dgmakhash["ena_muki"] == "L") then
+          
+        # 左の場合はそこを開ける
+        haikeimuki = "(iw*0.25)"
+          
+        
+      elsif (@dgmakhash["ena_muki"] == "R") then  
+        
+        # 右の場合はそこを開ける
+        haikeimuki = "(iw*0.05)"
+        
+      else
+          
+        # 中央の場合は両方を等間隔で開ける。
+        haikeimuki = "(iw*0.15)"
+          
+      end
+        
+      haikeisyoku = "drawbox=x=#{haikeimuki}:y=ih*0.8:w=iw*0.7:h=ih*0.2:t=fill:\
+                     color=#{@dgmakhash["voice_text_bgcolor"]}@#{@dgmakhash["voice_text_bgtoumei"]}:replace=1"
+        
+    else
+        
+      # 背景を入れない場合はnilにする
+      haikeisyoku = nil
+           
+    end
+    
+    
+    # 字幕のテキストファイルの中身を解析し、
+    # 一行ごとに分割したテキストファイルのパスを入れた配列を返す。
+    ena_textlist = enaTextSplit()
+    
+    
+    ### 文字描写の開始位置のy座標を決める。
+    ### 二行以上の場合は、その分描写開始位置を上にずらす必要がある。
+    ### 行数をカウントしてその文を収めるだけの高さから開始する。
+    ### 万が一、行数が多くて開始位置がマイナスになると、おそらくエラーになるので「0」にする。
+    ### また、文字の高さ分だけ開始位置を上にすると、動画の下ギリギリに字幕が描写されるので +10 している。
+    
+    # テキストファイルの行数をカウントする。
+    # 分割したファイルのパスを収めた配列の個数をカウントする。
+    gyoucunt = ena_textlist.count
+    
+    
+    # 行数が多くて行数が多くて開始位置がマイナスになるか確認し、
+    # その場合はgyoucuntに画面いっぱいに表示できる最大の行数を記録する。
+    if ( (@dgmakhash["movi_h"].to_i - (@dgmakhash ["voice_text_size"].to_i * gyoucunt + 10)) <= 0 ) then
+      
+      gyoucunt = @dgmakhash["movi_h"].to_i  / @dgmakhash ["voice_text_size"].to_i
+      
+    end
+    
+
+    
+    # 字幕のフチに色をつけるか判断する
+    if (@dgmakhash["enatextbord"] == "yes") then
+      huti = "bordercolor=#{@dgmakhash["voice_text_bordercr"]}:borderw=#{@dgmakhash["voice_text_borderw"]}:"
+    else
+      # 字幕のフチに色をつけない場合は空の値を入れる。
+      huti = ""
+    end
+      
+    # 字幕をどちらに寄せるかによって字幕の描写開始位置を変える
+    if (@dgmakhash["ena_muki"] == "L") then
+      
+      # 左の場合はそこを開ける
+      zimakumuki = "(w*0.3)-(w*0.04)"
+      
+    elsif (@dgmakhash["ena_muki"] == "R") then
+      
+      # 右の場合はそこを開ける
+      zimakumuki = "(w*0.06)"
+      
+    else
+      
+      # 向きが指定されていない場合は中央揃えで表示する。
+      zimakumuki = "((w-tw)/2)"
+      
+    end
+    
+    
+    # 完成したコマンドを入れる変数を宣言する。
+    zimakuline = "-filter_complex \"format=rgba"
+    
+    # 字幕の背景色を入れる
+    if (haikeisyoku != nil) then
+      zimakuline << ",#{haikeisyoku}"
+    end
+    
+    # ena_textlist 配列にある字幕のテキストファイルのパスからテキストを取り出し、
+    # ffmpeg に送るコマンドを作成する。
+    ena_textlist.each{ |filepath|
+      
+      # コマンドを作って追記する。
+      zimakuline << ",drawtext=fontfile=\'#{@dgmakhash["voice_text_fonts"]}\':\
+                     textfile=\'#{filepath}\':fontcolor=#{@dgmakhash["voice_text_color"]}:\
+                     #{huti}fontsize=#{@dgmakhash["voice_text_size"]}:x=#{zimakumuki}:y=h-((#{@dgmakhash["voice_text_size"]}*#{gyoucunt})+10)"
+      
+      # 文字列をひとつ出力したので、次の文字がその下に表示されるようにgyoucuntの値をひとつ少なくします。
+      gyoucunt-=1
+      
+    }
+    
+    
+    # 最後に「"」でコマンドを閉じる。
+    zimakuline << "\""
+    
+    
+    # 完成したコマンドを返す
+    return(zimakuline)
+  end
+  
+  
+  
+  
+  # ffmpegコマンドによる動画作成後の一時ファイルの削除等の作業を行う。
+  def afterDougamake()
+    
+    # 字幕テキストの入った一時ファイルを削除する。
+    system("rm -f ./cache/YOM_temptext???.txt")
+    
+    return(0)
+  end
+  
+  
+  
+  
+  # 字幕のテキストファイルの中身を解析し、
+  # 一行ごとに分割して一時ファイルに入れます。
+  # 
+  # 分割したテキストファイルのパスを入れた配列を返す。
+  def enaTextSplit()
+    
+    # 字幕のテキストを出力した一時ファイルのファイル名を格納する配列を宣言する。
+    enatext_tempfilelist = Array.new()
+    
+    # 元のテキストファイルの内容が一行づつ入る配列を宣言する。
+    rawtext = Array.new()
+    
+    # テキストファイルの中身を取得して、一行づつ処理する。
+    # 行ごとにファイルを分割する。
+    File.open(@dgmakhash["voice_text_file"], "r"){|file|
+       
+      file.each_line { |line|
+        # テキストファイルの内容を、行ごとに配列に入れる
+        rawtext << line
+      }
+      
+    }
+    
+    
+    ### テキストの行数によって処理を変える
+    ### 配列が2個以上（複数行ある場合）はファイルを分割する。
+    ### また、長さが長くて横がはみ出るときには、自動的に分割する処理を加える
+    
+    
+    
+    # 出力するテキストファイルのカウント用変数
+    anstext_count = -1
+    
+    # 一行づつ処理する
+    rawtext.each{ |line|
+      
+      
+      # 文字列を一旦別の変数に格納する。
+      temp_line = line
+      
+      
+      
+      # 文字列がnilであれば（全ての文字列の処理が終わったら）終了する。
+      while temp_line != "" do
+        
+        puts "temp_line:#{temp_line}"
+        # まだ処理していない文字列の長さを取得する
+        temp_line_len = temp_line.length
+        
+        
+        # 自動改行を行うかどうか判定し、yesになっていれば自動改行を行う。
+        if ( @dgmakhash["ena_auto_kaigyou"] == "yes" ) then
+          
+          # 分割が必要（文字列が画面外にはみ出てしまう）かどうか確認し、必要であれば分割処理を行う。
+          # 余白を確保するため、横幅からは左右５％（全部で１０％）引く
+          while ( ( @dgmakhash["voice_text_size"].to_i * temp_line_len ) > ( @dgmakhash["movi_w"].to_i - (@dgmakhash["movi_w"].to_i/10) ) ) do
+            
+            ## 分割を試みる
+            # 文字列の分割したい
+            temp_line_len = textSplitSearch(temp_line, $pisplit_list)
+          
+            # 分割する位置がnilの場合は指定した文字が見つからなかったので、中央で分割する。
+            if (temp_line_len == nil) then
+              temp_line_len = temp_line_len/2
+            end
+          
+            
+            
+          end
+        
+        else
+          
+          # 自動改行を行わない場合、全ての文字列を一時ファイルに出力する。
+          temp_line_len = temp_line.length
+          
+        end
+        
+        
+        # temp_line_len の文だけ文字列を取り出して、一時ファイルに出力する。
+        # 分割する
+        
+        # ファイルに書き込んでカウントする。
+        # その時ゼロ埋めで3桁にする
+        i_ume=sprintf("%03d", anstext_count)
+        filename = "./cache/YOM_temptext#{i_ume}.txt"
+        File.open(filename, mode = "w"){|file|
+          file.write(temp_line.slice(0, temp_line_len+1))
+          
+          # 抽出した文は変数から削除する
+          temp_line.slice!(0, temp_line_len+1)
+        }
+        
+        
+        # テキストを出力した一時ファイルのパスを記録し、行数のカウントをひとつ増やす。
+        anstext_count += 1
+        enatext_tempfilelist[anstext_count] = filename
+        
+      end
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+    }
+    
+    
+    # 作成したテキストファイル名の入った配列を返す。
+    return(enatext_tempfilelist)
+    
+  end
+  
+  
+  
+  
+  # 与えられた文字列を指定した文字で２つに分割できるところを検索する。
+  # 「、」や「。」で分割する。(splist配列に1文字づつ入れる)
+  # 分割する文字がない場合はnilを返す。
+  # 
+  # 分割する場所を数値で返す。
+  def textSplitSearch(textline, splist)
+    
+    
+    
+    # 分割したい文字で検索を行う。
+    splist.each{ |pisplit_mozi|
+      
+      # 分割したい文字がある場所を入れる配列を宣言
+      found_iti = Array.new()
+      
+      # 該当の文字があるか検索
+      x = textline.index(pisplit_mozi)
+      
+      # nilではなければ分割したい文字がある場所の数値が入っているので、
+      # 数値を配列に入れてその次の文字からまた検索する。
+      while x != nil do
+        
+        found_iti << x
+        
+        x = textline.index(pisplit_mozi, x+1)
+        
+      end
+      
+      # 検索した文字が見つからない（found_itiが空）か、
+      # 文字列の一番最後にしかない場合（分割できない）場合は次へ行く
+      if ( (found_iti.empty?) or (textline.length == ( found_iti[0] + 1 ) ) ) then
+        next
+      end
+      
+      
+      # 見つかった中で、中央に近い方の値を返す。
+      return(found_iti.min_by{|y| (y-(textline.length/2)).abs})
+      
+      
+    }
+    
+    # 見つからなかったため、nil返す。
+    return(nil)
+  end
+  
+  
   
   
   
