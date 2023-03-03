@@ -28,7 +28,7 @@ $voice_file_type_list = ["wav", "ogg", "mp3", "opus"]
 # どの項目の設定を用いて動画を作るか、判定を行なわなければならない要素を配列に記載
 $hantei_list = ["enatext", "ena_muki", "ena_auto_kaigyou", "enatextbord", "enabg", \
                 "tatie", "tatie_muki", "conp_tatie", "movi_w", "movi_h", "tatie_h_p", "fps", \
-                "voice_text_fonts", "voice_text_size", "voice_text_color", \
+                "voice_text_fonts", "voice_text_size", "voice_text_u_space_size", "voice_text_color", \
                 "voice_text_bordercr", "voice_text_borderw", "voice_text_bgcolor", "voice_text_bgtoumei"]
     
 
@@ -531,16 +531,16 @@ class YawaOngenMixer
     ### 二行以上の場合は、その分描写開始位置を上にずらす必要がある。
     ### 行数をカウントしてその文を収めるだけの高さから開始する。
     ### 万が一、行数が多くて開始位置がマイナスになると、おそらくエラーになるので「0」にする。
-    ### また、文字の高さ分だけ開始位置を上にすると、動画の下ギリギリに字幕が描写されるので +10 している。
+    ### また、文字の高さ分だけ開始位置を上にすると、動画の下ギリギリに字幕が描写されるので + @dgmakhash["voice_text_u_space_size"] している。
     
     # テキストファイルの行数をカウントする。
     # 分割したファイルのパスを収めた配列の個数をカウントする。
     gyoucunt = ena_textlist.count
     
     
-    # 行数が多くて行数が多くて開始位置がマイナスになるか確認し、
-    # その場合はgyoucuntに画面いっぱいに表示できる最大の行数を記録する。
-    if ( (@dgmakhash["movi_h"].to_i - (@dgmakhash ["voice_text_size"].to_i * gyoucunt + 10)) <= 0 ) then
+    # 字幕の行数が多くて開始位置がマイナスになるか確認し、
+    # マイナスになる場合はgyoucuntに画面いっぱいに表示できる最大の行数を記録する。
+    if ( (@dgmakhash["movi_h"].to_i - (@dgmakhash["voice_text_size"].to_i * gyoucunt + @dgmakhash["voice_text_u_space_size"].to_i)) <= 0 ) then
       
       gyoucunt = @dgmakhash["movi_h"].to_i  / @dgmakhash ["voice_text_size"].to_i
       
@@ -590,7 +590,8 @@ class YawaOngenMixer
       # コマンドを作って追記する。
       zimakuline << ",drawtext=fontfile=\'#{@dgmakhash["voice_text_fonts"]}\':\
                      textfile=\'#{filepath}\':fontcolor=#{@dgmakhash["voice_text_color"]}:\
-                     #{huti}fontsize=#{@dgmakhash["voice_text_size"]}:x=#{zimakumuki}:y=h-((#{@dgmakhash["voice_text_size"]}*#{gyoucunt})+10)"
+                     #{huti}fontsize=#{@dgmakhash["voice_text_size"]}:\
+                     x=#{zimakumuki}:y=h-((#{@dgmakhash["voice_text_size"]}*#{gyoucunt})+#{@dgmakhash["voice_text_u_space_size"]})"
       
       # 文字列をひとつ出力したので、次の文字がその下に表示されるようにgyoucuntの値をひとつ少なくします。
       gyoucunt-=1

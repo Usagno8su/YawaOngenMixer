@@ -68,6 +68,8 @@ defo:
     voice_text_fonts: "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
     # フォントサイズ
     voice_text_size: "38"
+    # 字幕の背景色をつけない時の、文字下の空きスペースのサイズ（ピクセル単位）
+    voice_text_u_space_size: "50"
     # フォントカラー
     voice_text_color: "0xFFFFFF"
     # フォント周りのフチの色
