@@ -72,12 +72,9 @@ Ubuntu 22.04 LTS にて動作を確認しています。
 - VOICEVOX
 - SHAREVOX
 - CoeFont (実験的)
-- VOICEPEAK (多分使えるはず)
+- VOICEPEAK
 
-VOICEPEAKについては公式ドキュメントを確認した上で、
-おそらく問題ないであろうという予測であり、正式対応ではありません。
-
-また、テキストファイル出力の有効化と、
+VOICEPEAKについては、テキストファイル出力の有効化と、
 出力ファイル名をVOICEVOXと同じに設定する必要があります。
 
 動画編集ソフトは「 [Shotcut](https://www.shotcut.org/) 」を使用しています。
