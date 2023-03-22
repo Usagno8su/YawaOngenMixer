@@ -27,7 +27,7 @@ $voice_file_type_list = ["wav", "ogg", "mp3", "opus"]
 
 # どの項目の設定を用いて動画を作るか、判定を行なわなければならない要素を配列に記載
 $hantei_list = ["enatext", "ena_muki", "ena_auto_kaigyou", "enatextbord", "enabg", \
-                "tatie", "tatie_muki", "conp_tatie", "movi_w", "movi_h", "tatie_h_p", "fps", \
+                "tatie", "tatie_muki", "conp_tatie", "movi_w", "movi_h", "tatie_h_p", "tatie_position_wps", "tatie_position_hps", "fps", \
                 "voice_text_fonts", "voice_text_size", "voice_text_u_space_size", "voice_text_color", \
                 "voice_text_bordercr", "voice_text_borderw", "voice_text_bgcolor", "voice_text_bgtoumei"]
     
@@ -350,7 +350,7 @@ class YawaOngenMixer
     # その値を「@valtypehash["tatie"]["どの項目から画像を取ったか"]」とすれば、「defo」,「キャラ名」,「キャラ名（スタイル）」,「音声ID」のいずれかが取得できる。
     # これにより、「 <タイプ>_<立ち絵の配置位置>_<画面サイズ>_<立ち絵の高さ(%)> 」の文字列が得られる。
     valtype = @valtypehash["tatie"]["valtype"]
-    filename = "#{@valtypehash["tatie"][valtype]}_#{tatie_muki}_#{@dgmakhash["movi_w"]}x#{@dgmakhash["movi_h"]}_#{@dgmakhash["tatie_h_p"]}_#{md5sh}.png"
+    filename = "#{@valtypehash["tatie"][valtype]}_#{tatie_muki}_#{@dgmakhash["movi_w"]}x#{@dgmakhash["movi_h"]}_#{@dgmakhash["tatie_h_p"]}_#{@dgmakhash["tatie_position_wps"]}_#{@dgmakhash["tatie_position_hps"]}_#{md5sh}.png"
     filepath = "#{@confihash["info"]["filedir"]["out_picdir"]}/#{filename}"  # フルパス
     
     
@@ -366,15 +366,64 @@ class YawaOngenMixer
       # 小数点以下は切り捨てる。
       tatie_h = ( ( @dgmakhash["movi_h"].to_i / 100 ) * @dgmakhash["tatie_h_p"].to_i ).floor
       
+      # 立ち絵の位置を指定した幅と高さ分移動させるため、％をピクセルに変換する。
+      # 小数点以下は切り捨てる。また絶対値にする（マイナスは一旦外す）。
+      tatie_position_w = ( ( @dgmakhash["movi_w"].to_i / 100 ) * (@dgmakhash["tatie_position_wps"].to_i).abs ).floor
+      tatie_position_h = ( ( @dgmakhash["movi_h"].to_i / 100 ) * (@dgmakhash["tatie_position_hps"].to_i).abs ).floor
+      
+      
+      ## 幅と高さの数値がそれぞれマイナスかどうか判定し、その場合は変数にマイナスを入れる。
+      ## そうでない場合はプラスを入れる。
+      ## ただ、ImageMagickは起点から中央の方向がプラスになる仕様なので、注意する。
+      
+      # 幅の部分がプラスかマイナスかを指定する。
+      # ただし、起点がEast（右）の場合はImageMagickの仕様上、方向が逆転するためプラスマイナスを逆にする。
+      if((@dgmakhash["tatie_position_wps"].to_i).negative?)then
+        if (tatie_muki.include?("East")) then
+          tatie_position_puramai_w = '+'
+        else
+          tatie_position_puramai_w = '-'
+        end
+      else
+        if (tatie_muki.include?("East")) then
+          tatie_position_puramai_w = '-'
+        else
+          tatie_position_puramai_w = '+'
+        end
+      end
+      
+       # 高さの部分。
+      # ただし、起点がSouth（下）の場合はImageMagickの仕様上、方向が逆転するためプラスマイナスを逆にする。
+      if((@dgmakhash["tatie_position_hps"].to_i).negative?)then
+        if (tatie_muki.include?("South")) then
+          tatie_position_puramai_h = '+'
+        else
+          tatie_position_puramai_h = '-'
+        end
+      else
+        if (tatie_muki.include?("South")) then
+          tatie_position_puramai_h = '-'
+        else
+          tatie_position_puramai_h = '+'
+        end
+      end
+      
+      
+      # 立ち絵の移動する位置を決める。
+      tatie_position = "#{tatie_position_puramai_w}#{tatie_position_w}#{tatie_position_puramai_h}#{tatie_position_h}"
+      
       # 立ち絵を縮小する。
       system("convert -resize x#{tatie_h} \"#{@dgmakhash["tatie"]}\" ./cache/yom_tatie_temp.png")
       
+      # 動画の画面サイズの透明な画像を生成する。
+      system("convert -size #{@dgmakhash["movi_w"]}x#{@dgmakhash["movi_h"]} xc:none ./cache/yom_base_temp.png")
+      
       # 動画の画面サイズの画像を生成する。
-      system("convert ./cache/yom_tatie_temp.png -gravity #{tatie_muki} -background none \
-              -extent #{@dgmakhash["movi_w"]}x#{@dgmakhash["movi_h"]} \"#{filepath}\" ")
+      system("convert ./cache/yom_base_temp.png ./cache/yom_tatie_temp.png -gravity #{tatie_muki} \
+               -background none -geometry #{tatie_position} -compose over -composite \"#{filepath}\" ")
     
       # 一時ファイルを削除する。
-      system("rm -f ./cache/yom_tatie_temp.png")
+      system("rm -f ./cache/yom_tatie_temp.png ./cache/yom_base_temp.png")
     
     end
     

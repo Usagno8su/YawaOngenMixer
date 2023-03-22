@@ -50,6 +50,10 @@ defo:
     tatie_muki: "SouthEast"
     # 立ち絵を画面の高さの何％にするか指定する。
     tatie_h_p: "50"
+    # 立ち絵の位置を指定した幅分移動させる（画面の幅の％）
+    tatie_position_wps: "0"
+    # 立ち絵の位置を指定した高さ分移動させる（画面の高さの％）
+    tatie_position_hps: "0"
     # 入力される立ち絵と、出力される動画のフレームレート指定
     fps: "5"
     
@@ -69,7 +73,7 @@ defo:
     # フォントサイズ
     voice_text_size: "38"
     # 字幕の背景色をつけない時の、文字下の空きスペースのサイズ（ピクセル単位）
-    voice_text_u_space_size: "10"
+    voice_text_u_space_size: "50"
     # フォントカラー
     voice_text_color: "0xFFFFFF"
     # フォント周りのフチの色
