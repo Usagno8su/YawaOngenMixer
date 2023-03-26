@@ -396,15 +396,15 @@ class YawaOngenMixer
       # ただし、起点がSouth（下）の場合はImageMagickの仕様上、方向が逆転するためプラスマイナスを逆にする。
       if((@dgmakhash["tatie_position_hps"].to_i).negative?)then
         if (tatie_muki.include?("South")) then
-          tatie_position_puramai_h = '+'
-        else
           tatie_position_puramai_h = '-'
+        else
+          tatie_position_puramai_h = '+'
         end
       else
         if (tatie_muki.include?("South")) then
-          tatie_position_puramai_h = '-'
-        else
           tatie_position_puramai_h = '+'
+        else
+          tatie_position_puramai_h = '-'
         end
       end
       
