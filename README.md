@@ -114,6 +114,10 @@ main_config.yml の下記の行を変更し、「 1. 」のファイルを指定
 
 - [/YawaOngenMixer_doc/docs/configファイルの記述方法.md](https://github.com/Usagno8su/YawaOngenMixer_doc/blob/main/docs/config%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%81%AE%E8%A8%98%E8%BF%B0%E6%96%B9%E6%B3%95.md)
 
+また、各キャラクター設定を入れたサンプルを下記にアップしました。
+
+- [/YawaOngenMixer_doc/docs/sample_config.yml](https://github.com/Usagno8su/YawaOngenMixer_doc/blob/main/docs/sample_config.yml)
+
 
 
 4. 変換の実行
