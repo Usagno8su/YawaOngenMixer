@@ -290,7 +290,7 @@ class YawaOngenMixer
     # 音声と立ち絵を合成する。
     # このとき「-shortest」を入れないとエンコードが止まらない。
     # また「-fflags shortest -max_interleave_delta 100M」を入れないと動画の後ろに余計な無音時間が入る。
-    system("ffmpeg -y -loop 1 -r #{@dgmakhash["fps"]} -i #{@dgmakhash["tatie"]} -i \"#{@dgmakhash["voice_file"]}\" \
+    system("ffmpeg -y -loop 1 -r #{@dgmakhash["fps"]} -i \"#{@dgmakhash["tatie"]}\" -i \"#{@dgmakhash["voice_file"]}\" \
             -auto-alt-ref 0 -c:a libvorbis -c:v libvpx-vp9 -shortest -fflags shortest -max_interleave_delta 20M \
             #{zimakuline} -r #{@dgmakhash["fps"]} \"#{@dgmakhash["out_mvfile"]}\"")
     
