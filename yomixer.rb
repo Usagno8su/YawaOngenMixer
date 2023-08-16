@@ -1,4 +1,5 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env ruby -
+# encoding: utf-8
 
 #
 ## やわ音原ミキサー
@@ -289,7 +290,7 @@ class YawaOngenMixer
     # 音声と立ち絵を合成する。
     # このとき「-shortest」を入れないとエンコードが止まらない。
     # また「-fflags shortest -max_interleave_delta 100M」を入れないと動画の後ろに余計な無音時間が入る。
-    system("ffmpeg -y -loop 1 -r #{@dgmakhash["fps"]} -i #{@dgmakhash["tatie"]} -i \"#{@dgmakhash["voice_file"]}\" \
+    system("ffmpeg -y -loop 1 -r #{@dgmakhash["fps"]} -i \"#{@dgmakhash["tatie"]}\" -i \"#{@dgmakhash["voice_file"]}\" \
             -auto-alt-ref 0 -c:a libvorbis -c:v libvpx-vp9 -shortest -fflags shortest -max_interleave_delta 20M \
             #{zimakuline} -r #{@dgmakhash["fps"]} \"#{@dgmakhash["out_mvfile"]}\"")
     
@@ -720,27 +721,27 @@ class YawaOngenMixer
         # まだ処理していない文字列の長さを取得する
         temp_line_len = temp_line.length
         
-        
         # 自動改行を行うかどうか判定し、yesになっていれば自動改行を行う。
         if ( @dgmakhash["ena_auto_kaigyou"] == "yes" ) then
           
           # 分割が必要（文字列が画面外にはみ出てしまう）かどうか確認し、必要であれば分割処理を行う。
           # 余白を確保するため、横幅からは左右５％（全部で１０％）引く
-          while ( ( @dgmakhash["voice_text_size"].to_i * temp_line_len ) > ( @dgmakhash["movi_w"].to_i - (@dgmakhash["movi_w"].to_i/10) ) ) do
+          while ( ( @dgmakhash["voice_text_size"].to_i * temp_line_len.to_i ) > ( @dgmakhash["movi_w"].to_i - (@dgmakhash["movi_w"].to_i/10) ) ) do
             
             ## 分割を試みる
             # 文字列の分割したい
-            temp_line_len = textSplitSearch(temp_line, $pisplit_list)
-          
-            # 分割する位置がnilの場合は指定した文字が見つからなかったので、中央で分割する。
-            if (temp_line_len == nil) then
-              temp_line_len = temp_line_len/2
-            end
-          
+            slice_len_count = textSplitSearch(temp_line.slice(0, temp_line_len.to_i + 1), $pisplit_list)
             
+            # 分割する位置が nil の場合は指定した文字が見つからなかったので、中央で分割する。(小数点以下は切り捨てる。)
+            # nilではない場合はそのまま値を入れる。
+            if (slice_len_count == nil) then
+              temp_line_len = (temp_line_len.to_i / 2).floor
+            else
+              temp_line_len = slice_len_count
+            end
             
           end
-        
+
         else
           
           # 自動改行を行わない場合、全ての文字列を一時ファイルに出力する。
@@ -757,10 +758,10 @@ class YawaOngenMixer
         i_ume=sprintf("%03d", anstext_count)
         filename = "./cache/YOM_temptext#{i_ume}.txt"
         File.open(filename, mode = "w"){|file|
-          file.write(temp_line.slice(0, temp_line_len+1))
+          file.write(temp_line.slice(0, temp_line_len.to_i + 1))
           
           # 抽出した文は変数から削除する
-          temp_line.slice!(0, temp_line_len+1)
+          temp_line.slice!(0, temp_line_len.to_i + 1)
         }
         
         
@@ -792,7 +793,7 @@ class YawaOngenMixer
   
   # 与えられた文字列を指定した文字で２つに分割できるところを検索する。
   # 「、」や「。」で分割する。(splist配列に1文字づつ入れる)
-  # 分割する文字がない場合はnilを返す。
+  # 分割する文字がない場合は nil を返す。
   # 
   # 分割する場所を数値で返す。
   def textSplitSearch(textline, splist)
@@ -811,27 +812,25 @@ class YawaOngenMixer
       # nilではなければ分割したい文字がある場所の数値が入っているので、
       # 数値を配列に入れてその次の文字からまた検索する。
       while x != nil do
-        
+
         found_iti << x
         
-        x = textline.index(pisplit_mozi, x+1)
+        x = textline.index(pisplit_mozi, x.to_i + 1)
         
       end
-      
+
       # 検索した文字が見つからない（found_itiが空）か、
-      # 文字列の一番最後にしかない場合（分割できない）場合は次へ行く
-      if ( (found_iti.empty?) or (textline.length == ( found_iti[0] + 1 ) ) ) then
+      # 文字列の一番最後にしかない場合（検索文字がひとつしかなく、なおかつその文字が最後あたりにある）場合は次へ行く。
+      if ( (found_iti.empty?) or ( (found_iti.size == 1) && ( textline.index(pisplit_mozi, textline.length - 3) != nil )  ) ) then
         next
       end
       
-      
       # 見つかった中で、中央に近い方の値を返す。
       return(found_iti.min_by{|y| (y-(textline.length/2)).abs})
-      
-      
+
     }
     
-    # 見つからなかったため、nil返す。
+    # 見つからなかったため、nilを返す。
     return(nil)
   end
   
